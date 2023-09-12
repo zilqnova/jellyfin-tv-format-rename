@@ -1,0 +1,75 @@
+#!/bin/bash
+set -e
+help_message="Usage:\n-h, --help:\t\tPrint this message.\n-s, --season:\t\tProvide a number for the season. Deafult: 1.\n-e, --extension:\tLook for a certain file type. Default: mp4.\n-v, --verbose:\t\tPrint more information."
+args=($@)
+
+#check if variable is a positive integer
+function isint() { 
+  if [[ "$1" =~ ^[[:digit:]]+$ ]]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
+#check if argument is flag
+function isflag() {
+  if [[ "$1" =~ ^-{1,2}[[:alnum:]]+$ ]]; then
+    echo true
+  else
+    echo false
+  fi
+}
+
+#rename files based on iteration
+function main() {
+  episode_num=1
+  for i in *.$extension; do
+    if [ "$i" = "*.$extension" ]; then
+      echo -e "ERROR: no $extension files found\n$help_message" && exit 1
+    fi
+    if [ $episode_num -lt 10 ]; then
+      new_name="S${season}E0${episode_num}.${extension}"
+      mv "$i" "$new_name"
+      [ -n $verbose ] && echo -e "Renaming $i to $new_name"
+    else
+      new_name="S${season}E${episode_num}.${extension}"
+      mv "$i" "$new_name"
+      [ -n $verbose ] && echo -e "Renaming $i to $new_name"
+    fi
+    episode_num=$(($episode_num+1))
+  done
+}
+
+#parse args and set defaults
+season=1
+extension="mp4"
+index=0
+for a in "${args[@]}"; do
+  case $a in
+    "-h"|"--help") echo -e "A script to name files for use with jellyfin. Files are assumed to already be numbered to rename sequentially.\n$help_message" && exit 0;;
+    "-s"|"--season") 
+      if [ $(isint "${args[$(($index+1))]}") = true ]; then
+        season=${args[$(($index+1))]}
+      else
+        echo -e "ERROR: season must be a positive integer\n$help_message" && exit 1
+      fi;;
+    "-e"|"--extension") extension="${args[$(($index+1))]}";;
+    "-v"|"--verbose") verbose=true;;
+    *)
+      if [ $(isflag "$a") = true ]; then
+        echo -e "ERROR: argument $a not recognized\n$helpmessage" && exit 1
+      else
+        if [ $(isflag "${args[$(($index-1))]}") != true ]; then
+          echo -e "ERROR: each argument requires only one value\n$help_message" && exit 1
+        fi
+      fi;;
+  esac
+  index=$(($index+1))
+done
+if [ $season -lt 10 ]; then
+  season="0$season"
+fi
+
+main
+exit 0
