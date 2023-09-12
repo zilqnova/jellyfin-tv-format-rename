@@ -7,7 +7,7 @@ This script is good for if you have ripped files from a Blu-Ray for example and 
 ## Usage
 
 ```
-* -s, --season: Sets the season number, defaults to 1.
-* -e, --extension: Sets the extension (e.g., mkv, ts, etc.), defaults to mp4.
-* -v, --verbose: Increases the output of the script.
+-s, --season: Sets the season number, defaults to 1.
+-e, --extension: Sets the extension (e.g., mkv, ts, etc.), defaults to mp4.
+-v, --verbose: Increases the output of the script.
 ```
